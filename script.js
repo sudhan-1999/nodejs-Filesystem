@@ -1,44 +1,44 @@
-const fs = require("node:fs/promises"); //common js import
+// Importing required modules
+import fs from "node:fs/promises";
+import express from "express";
 
-//creating server
-const express = require("express");
-
+// Creating server
+const app = express();
+const port = 5000;
+app.use(express.json());
 
 //creating file with current date and time as file name
-const date = new Date();
-const name = `${date.getFullYear()}-${
-  date.getMonth() + 1
-}-${date.getDate()}-${date.getHours()}-${date.getMinutes()}`;
-
-
-
-//function to create files dynamically
-async function writefilewithName(filename = "", content = "") {
+app.post("/createfile", async (req, res) => {
   try {
-    await fs.writeFile(`./files/${filename}.txt`, `${content}`, "utf8", (
-      console.log("file creation sucessfull"))
-    );
-  } catch(error)  {
-    console.log(error);
+    const date = new Date();
+    const name = `${date.getFullYear()}-${
+      date.getMonth() + 1
+    }-${date.getDate()}-${date.getHours()}-${date.getMinutes()}`;
+    
+    await fs.writeFile(`./files/${name}.txt`, `${name}`, "utf8");
+    
+    res.send("File creation successful");
+  } catch (err) {
+    res.status(500).send(err.toString());
   }
-}
-writefilewithName(name, name),
-      writefilewithName("message-0", "file creation task -1"),
-      writefilewithName("message-1", "file creation task -2"),
-      writefilewithName("message-2", "file creation task -3")
-
-
+});
 
 
 //readin text files from directory
-async function readfileFrompath(dirname = "") {
+app.get("/readfiles", async (req, res) => {
   try {
-    const files = await fs.readdir(`./${dirname}`);
-    console.log(files);
-  } catch(error)  {
-    console.log(error);
+    const name = req.query.name;
+    console.log(name)
+    console.log(`GET /readfiles called with query parameter: ${name}`);
+    
+    const files = await fs.readdir(name);
+      res.send(files);
+    
+  } catch (err) {
+    console.error(`Error reading directory: ${err}`);
+    res.status(500).send(err.toString());
   }
-}
-readfileFrompath("files")
+});
 
 
+app.listen(port,()=>{console.log(`server starteed at at port,${port}`)})
